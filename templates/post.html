@@ -25,8 +25,9 @@
     <div class="row gx-4 gx-lg-5 justify-content-center">
       <div class="col-md-10 col-lg-8 col-xl-7">
         {{ post.body|safe }}
-        <!--TODO: Only show Edit Post button if user id is 1 (admin user) -->
-        {% if current_user.id == 1%}
+
+        <!-- Only show Edit Post button if user is the author or the admin -->
+        {% if current_user.is_authenticated and (current_user.id == post.author_id or current_user.id == 1) %}
         <div class="d-flex justify-content-end mb-4">
           <a
             class="btn btn-primary float-right"
@@ -35,20 +36,26 @@
           >
         </div>
         {% endif %}
-         {{ ckeditor.load() }}
-        <!-- Configure it with the name of the form field from CommentForm -->
-        {{ ckeditor.config(name='comment_text') }}
-        <!-- Create the wtf quick form from CommentForm -->
-        {{ render_form(form, novalidate=True) }}
-        <div class="comment">
+
+        <!-- Only show the comment writing blank if the user is logged in -->
+        {% if current_user.is_authenticated %}
+          {{ ckeditor.load() }}
+          {{ ckeditor.config(name='comment_text') }}
+          {{ render_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+        {% else %}
+          <div class="alert alert-secondary mt-5" role="alert">
+            You need to <a href="{{ url_for('login') }}" class="alert-link">log in</a> or <a href="{{ url_for('register') }}" class="alert-link">register</a> to leave a comment.
+          </div>
+        {% endif %}
+
+        <div class="comment mt-5">
           <ul class="commentList">
             <!-- Show all comments -->
-            {% for comment in post.comments: %}
+            {% for comment in post.comments %}
             <li>
               <div class="commenterImage">
-                <img
-                  src="{{ comment.comment_author.email | gravatar }}"
-                />
+                <!-- Uses the new custom avatar method -->
+                <img src="{{ comment.comment_author.avatar(74) }}" />
               </div>
               <div class="commentText">
                 {{comment.text|safe}}
@@ -57,8 +64,8 @@
             </li>
             {% endfor %}
           </ul>
-
         </div>
+
       </div>
     </div>
   </div>

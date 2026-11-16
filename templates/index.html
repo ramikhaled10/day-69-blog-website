@@ -16,10 +16,12 @@
     </div>
   </div>
 </header>
+
 <!-- Main Content-->
 <div class="container px-4 px-lg-5">
   <div class="row gx-4 gx-lg-5 justify-content-center">
     <div class="col-md-10 col-lg-8 col-xl-7">
+
       <!-- Post preview-->
       {% for post in all_posts %}
       <div class="post-preview">
@@ -31,8 +33,9 @@
           Posted by
           <a href="#">{{post.author.name}}</a>
           on {{post.date}}
-          <!-- TODO: Only show delete button if user id is 1 (admin user) -->
-          {% if current_user.id==1 %}
+
+          <!-- DELETE BUTTON: Only show if the logged-in user is the author of this post OR the admin (id=1) -->
+          {% if current_user.is_authenticated and (current_user.id == post.author_id or current_user.id == 1) %}
           <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
           {% endif %}
         </p>
@@ -41,9 +44,8 @@
       <hr class="my-4" />
       {% endfor %}
 
-      <!-- New Post -->
-      <!-- TODO: Only show Create Post button if user id is 1 (admin user) -->
-      {% if current_user.id==1 %}
+      <!-- CREATE NEW POST BUTTON: Show to ANY logged-in user -->
+      {% if current_user.is_authenticated %}
       <div class="d-flex justify-content-end mb-4">
         <a
           class="btn btn-primary float-right"
@@ -57,6 +59,7 @@
       <div class="d-flex justify-content-end mb-4">
         <a class="btn btn-secondary text-uppercase" href="#!">Older Posts →</a>
       </div>
+
     </div>
   </div>
 </div>
